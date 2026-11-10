@@ -3,15 +3,16 @@ from keras.models import Sequential
 from keras.layers import Dense, Input
 from keras.utils import to_categorical
 from keras.optimizers import SGD
+import matplotlib.pyplot as plt #<-- Needed for visualization
 
 # load the MNIST dataset which is luckily stored in keras
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-# Non capisco ancora questo passo
+# I still don't understand this pass
 X_train = X_train.reshape((X_train.shape[0], 28 * 28))
 X_test = X_test.reshape((X_test.shape[0], 28 * 28))
 
-# convertiamo da indici a float perchè è il formato supportato in keras
+# Convert from integer to float as it is the format better supported by keras
 X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
 
@@ -36,3 +37,23 @@ model.add(Dense(10, activation='softmax')) #we use softmax as said before for th
 # compile the model
 sgd = SGD(learning_rate=0.01) # Define how fast the stochastic gradient descents, converges
 model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy']) # <-- still to understand
+
+# fit the model, define the epoch, and the number of sample taken before it's time to update the weight
+history = model.fit(X_train, y_train, epochs=10, batch_size=128)
+
+# evaluate the model
+loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+print(f'Test Accuracy: {accuracy * 100:.2f}%')
+
+
+# plot the accuracy and the loss curves
+fig, ax1 = plt.subplots()
+ax2 = ax1.twinx()
+ax1.plot(history.history['accuracy'], 'g-')
+ax2.plot(history.history['loss'], 'b-')
+ax1.set_xlabel('Epochs')
+ax1.set_ylabel('Accuracy', color='g')
+ax2.set_ylabel('Loss', color='b')
+plt.title('Model Accuracy and Loss')
+plt.show()
+plt.savefig('model_accuracy_loss.png') # To save the image in case the OS doesn't support a visualizer
